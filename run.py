@@ -14,7 +14,7 @@ if __name__ == '__main__':
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
 
-    parser = argparse.ArgumentParser(description='FACT')
+    parser = argparse.ArgumentParser(description='TimeRelay')
 
     # basic config
     parser.add_argument('--task_name', type=str, required=True, default='long_term_forecast',
