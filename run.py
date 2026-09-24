@@ -70,59 +70,6 @@ if __name__ == '__main__':
     parser.add_argument('--activation', type=str, default='gelu', help='activation')
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
     parser.add_argument('--use_norm', type=int, default=1, help='whether to use normalize; True 1 False 0')
-    
-
-    # orthoLinear
-    parser.add_argument('--CovMatTrans', type=str, default='softmax', help='CovMatTrans for ablations')
-    parser.add_argument('--WeightTrans', type=str, default='softplus', help='WeightTrans for ablations')
-    parser.add_argument('--NormSet', type=str, default='L1', help='NormSet for ablations')
-    parser.add_argument('--pre_lin', type=int, default=1, help='pre_linear for orthoLinear')
-    parser.add_argument('--post_lin', type=int, default=1, help='post_linear for orthoLinear')
-    parser.add_argument('--var_linear_mode', type=str, default='attn_linear', help='var_linear_mode for orthoLinear')
-    parser.add_argument('--temp_linear', type=int, default=1, help='temp_linear for orthoLinear')
-    parser.add_argument('--temp_attn_linear', type=int, default=0, help='temp_attn_linear for orthoLinear')
-    parser.add_argument('--var_linear_enable', type=int, default=1, help='var_linear_enable for orthoLinear')
-    parser.add_argument('--ortho_enc', type=int, default=1, help='ortho_enc for orthoLinear')
-    parser.add_argument('--ortho_dec', type=int, default=1, help='ortho_dec for orthoLinear')
-    parser.add_argument('--ortho_n_heads', type=int, default=2, help='ortho_n_heads for orthoLinear')
-    # orthoformer
-    parser.add_argument('--q_mat_file', type=str, default=None, help='q_mat_file npy file')
-    parser.add_argument('--c_mat_file', type=str, default=None, help='c_mat_file npy file')
-    parser.add_argument('--q_channel_file', type=str, default=None, help='q_channel_file npy file')
-    parser.add_argument('--Q_MAT_file', type=str, default=None, help='Q_MAT_file npy file')
-    parser.add_argument('--q_out_mat_file', type=str, default=None, help='q_out_mat_file npy file')
-    parser.add_argument('--c_out_mat_file', type=str, default=None, help='c_out_mat_file npy file')
-    parser.add_argument('--Q_OUT_MAT_file', type=str, default=None, help='Q_OUT_MAT_file npy file')
-    parser.add_argument('--Q_chan_indep', type=int, default=0, help='Q_channel_independence')
-    parser.add_argument('--Q_loss', type=int, default=0, help='use Q_mat in loss function')
-    parser.add_argument('--FFT_loss', type=int, default=0, help='use FFT_loss in loss function')
-    parser.add_argument('--Q_loss_alpha', type=float, default=0.5, help='Q_loss_alpha')
-    parser.add_argument('--dim_reduce_ratio', type=float, default=1.0, help='dim_reduce_ratio')
-    
-    # CycleNet.
-    parser.add_argument('--cycle', type=int, default=168, help='cycle length')
-
-
-    # VPNet
-    parser.add_argument('--alpha', type=float, default=3, help=' loss function alpha')
-    parser.add_argument('--encoder_dropout', type=float, default=0.1, help=' loss function alpha')
-    parser.add_argument('--slice_len', type=int, default=12, help='slice length')
-    parser.add_argument('--middle_len', type=int, default=512, help='middle length')
-    parser.add_argument('--hidden_len', type=int, default=256, help='hidden length')
-    parser.add_argument('--slice_stride', type=int, default=6, help='stride')
-    parser.add_argument('--var_tcn_blocks', type=int, default=2, help='gpu')
-    parser.add_argument('--kernel_vars', type=int, default=17, help='gpu')
-    parser.add_argument('--kernel_patches', type=int, default=3, help='gpu')
-    parser.add_argument('--var_ff_ratio', type=int, default=4, help='gpu')
-    parser.add_argument('--var_dropout', type=float, default=0.1, help='gpu')
-
-
-    # FACT
-    parser.add_argument('--num_kernels', type=int, default=4, help='the kernels numbers of Inception block')
-    parser.add_argument('--dilation', type=int, nargs='+', default=[1,2,3,2,1], help='dilation of Inception block')  
-    parser.add_argument('--mode', type=str, default='no', help='CNN mode: freq or not freq')  
-    parser.add_argument('--padding_mode', type=str, default='zeros', help='padding mode of CNN: zeros,replicate, reflect, circular')  
-    parser.add_argument('--core', type=float, default=0.5, help='weight of frequency and time domain')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=0, help='data loader num workers')
