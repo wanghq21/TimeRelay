@@ -320,7 +320,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         print('mse:{}, mae:{}, rmse:{}, mape:{}'.format(mse, mae, rmse, mape))
         f = open("result_long_term_forecast.txt", 'a')
         f.write(setting + "  \n")
-        f.write('mse:{}, mae:{}, rmse:{}, mape:{},  patch:{}, dropout:{}, learning_rate:{}'.format(mse, mae, rmse, mape, self.args.patch, self.args.dropout, self.args.learning_rate))
+        f.write('mse:{}, mae:{}, rmse:{}, mape:{}'.format(mse, mae, rmse, mape))
         f.write('\n')
         f.write('\n')
         f.close()
