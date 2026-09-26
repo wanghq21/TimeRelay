@@ -65,7 +65,7 @@ TimeRelay/
 
 ## Installation
 
-1. Create a Python environment with **Python 3.8**.
+1. Create a Python environment with **Python 3.12**.
 
 2. Install dependencies:
 
