@@ -468,7 +468,7 @@ class RMSNorm(nn.Module):
     def __init__(self, normalized_shape, eps=1e-8):
         super(RMSNorm, self).__init__()
         self.eps = eps
-        self.scale = nn.Parameter(torch.ones(*normalized_shape))  # 可学习的缩放参数
+        self.scale = nn.Parameter(torch.ones(*normalized_shape))   
 
     def forward(self, x):
         rms = torch.sqrt(torch.mean(x**2, dim=(-2, -1), keepdim=True) + self.eps)
@@ -518,7 +518,7 @@ class CompactMultiscale_MLP(nn.Module):
         self.dropout_p = configs.dropout
         self.core = 64
         self.use_decomp = getattr(configs, "use_decomp", False)
-        self.patch = list(getattr(configs, "patch_sizes", [1,4,12,24]))
+        self.patch = list(getattr(configs, "patch_sizes", [4,12,24]))
 
         if not self.patch:
             raise ValueError("patch_sizes must not be empty")
@@ -609,6 +609,8 @@ class CompactMultiscale_MLP(nn.Module):
 
         x_var = x.transpose(1, 2)
         base = self.base_proj(x_var)
+
+        
         scale1 = self.scale1_proj(x_var)
         scale_features = [scale1]
 
@@ -665,9 +667,10 @@ class RelationAwareRecurrentMixer(nn.Module):
         self.relation_aware = relation_aware
 
         self.scan_mode = str(getattr(configs, "scan_mode", "work_efficient")).lower()
+        self.use_triton = getattr(configs, "use_triton", True)   #  only for work_efficient
         self.relation_gate = str(getattr(configs, "relation_gate", "additive")).lower()    # dense  additive
         self.context_type = str(getattr(configs, "context_type", "learnable")).lower()   # learnable  mean
-        self.use_triton = True
+        
         self.norm = nn.LayerNorm(self.d_model)
 
         if self.relation_aware:
@@ -905,23 +908,23 @@ class RelationAwareRecurrentMixer(nn.Module):
 
 
     def _bidirectional_scan(self,a_f,b_f,a_b,b_b):
-        if self.scan_mode in ["work_efficient","work-efficient"]:
-            if self.use_triton:
+        if self.scan_mode in ["work_efficient", "work-efficient"]:
+            if (self.use_triton and _HAS_TRITON and a_f.is_cuda and b_f.is_cuda and a_b.is_cuda and b_b.is_cuda ):
                 return triton_bidirectional_affine_scan(a_f, b_f, a_b, b_b)
-            else:
-                B = a_f.size(0)
 
-                a_b_rev = torch.flip(a_b,dims=(1,))
-                b_b_rev = torch.flip(b_b,dims=(1,))
+            B = a_f.size(0)
 
-                a_all = torch.cat((a_f, a_b_rev),dim=0)
-                b_all = torch.cat((b_f, b_b_rev),dim=0)
+            a_b_rev = torch.flip(a_b, dims=(1,))
+            b_b_rev = torch.flip(b_b, dims=(1,))
 
-                h_all = self._work_efficient_affine_scan(a_all,b_all)
+            a_all = torch.cat((a_f, a_b_rev), dim=0)
+            b_all = torch.cat((b_f, b_b_rev), dim=0)
 
-                h_f = h_all[:B]
-                h_b = torch.flip(h_all[B:],dims=(1,))
-                return h_f, h_b
+            h_all = self._work_efficient_affine_scan(a_all, b_all)
+
+            h_f = h_all[:B]
+            h_b = torch.flip(h_all[B:], dims=(1,))
+            return h_f, h_b
 
         else:
             B = a_f.size(0)
