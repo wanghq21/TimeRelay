@@ -1,13 +1,13 @@
 import os
 import torch
-from models import FACT
+from models import TimeRelay
 
 
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
         self.model_dict = {
-            'FACT':FACT,
+            'TimeRelay':TimeRelay,
         }
         if args.model == 'Mamba':
             print('Please make sure you have successfully installed mamba_ssm')
