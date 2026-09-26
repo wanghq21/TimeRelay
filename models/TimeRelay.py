@@ -434,6 +434,36 @@ def _torch_bidirectional_scan(scan_fn, a_f, b_f, a_b, b_b):
 
 
 
+
+
+
+
+
+class moving_avg(nn.Module):
+    def __init__(self, kernel_size, stride):
+        super(moving_avg, self).__init__()
+        self.kernel_size = kernel_size
+        self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=0)
+
+    def forward(self, x):
+        front = x[:, 0:1, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        end = x[:, -1:, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        x = torch.cat([front, x, end], dim=1)
+        x = self.avg(x.permute(0, 2, 1))
+        x = x.permute(0, 2, 1)
+        return x
+
+class series_decomp(nn.Module):
+    def __init__(self, kernel_size):
+        super(series_decomp, self).__init__()
+        self.moving_avg = moving_avg(kernel_size, stride=1)
+
+    def forward(self, x):
+        moving_mean = self.moving_avg(x)
+        res = x - moving_mean
+        return res, moving_mean
+
+
 class RMSNorm(nn.Module):
     def __init__(self, normalized_shape, eps=1e-8):
         super(RMSNorm, self).__init__()
@@ -654,6 +684,9 @@ class RelationAwareRecurrentMixer(nn.Module):
             elif self.relation_gate == "additive":
                 self.gate_e = nn.Linear(self.d_model,2 * self.d_model)
                 self.gate_c = nn.Linear(self.d_model,2 * self.d_model)
+                self.delta_scale = nn.Parameter( torch.zeros(2, self.d_model) ) 
+                self.prod_scale = nn.Parameter( torch.zeros(2, self.d_model) ) 
+                self.gate_bias = nn.Parameter( torch.zeros(2, self.d_model) ) 
             else:
                 raise ValueError('relation_gate must be either ''"additive" or "dense"')
         else:
@@ -708,10 +741,12 @@ class RelationAwareRecurrentMixer(nn.Module):
                 gate_logits = (self.gate_e(e).view(B, C, 2, D) + self.gate_c(c).view(B, C, 2, D))
 
                 delta = torch.abs(e - c)
-                gate_logits = gate_logits + delta.unsqueeze(2)
+                gate_logits = gate_logits + (delta.unsqueeze(2) * self.delta_scale.view(1, 1, 2, D))
 
                 prod = e * c
-                gate_logits = gate_logits + prod.unsqueeze(2)
+                gate_logits = gate_logits + (prod.unsqueeze(2) * self.prod_scale.view(1, 1, 2, D))
+
+                gate_logits = gate_logits + self.gate_bias.view(1, 1, 2, D)
 
         else:
             gate_logits = self.gate_plain(e).view(B, C, 2, D)
